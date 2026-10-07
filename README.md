@@ -1,44 +1,47 @@
-# 风夏打包器 · FengXia-Packer
+# FengXia-Packer
 
-> 随时随地写网页，一键打包成 Windows 可执行文件（.exe）。
+> Write HTML on the go, and package it into a standalone Windows executable (.exe) with one click.
 
-把你的 HTML、图片、CSS、JS 等项目文件，一键打包成一个双击就能运行的 exe，
-接收方不需要装 Node、不需要装任何运行环境，打开即用。
+FengXia-Packer bundles your HTML, images, CSS and JavaScript files into a single `.exe` that anyone can just double-click to run. The recipient does **not** need to install Node.js, a browser, or any runtime — everything is packaged in.
 
 ---
 
-## ✨ 功能特性
+## ✨ Features
 
-- **一键打包**：HTML 及其依赖资源（图片、样式、脚本）打包为独立 exe
-- **内置代码编辑器**：支持 8 种常见语言，实时代码高亮 + 自动补全
-- **基于 NW.js**：底层使用成熟的 NW.js 运行时，打包产物自带 Chromium
-- **图形界面**：无需命令行，点几下就能完成打包
+- **One-click packaging** — HTML and all its assets (images, styles, scripts) are packed into a standalone exe.
+- **Built-in code editor** — write and edit inside the tool; supports 8 common languages with real-time syntax highlighting and auto-completion.
+- **Built on NW.js** — the output app ships with its own Chromium, so it runs the same everywhere on Windows.
+- **GUI workflow** — no command line, no build config; just pick your entry file and go.
 
-## 📦 适合用来做什么
+## 📦 What it's good for
 
-- 把 HTML 小游戏 / 小工具发给朋友，双击即玩
-- 给网页作品做一个脱离浏览器的独立版本
-- 快速演示、离线展示
+- Sending an HTML game / small tool to a friend — they just double-click to open it.
+- Shipping a webpage as a desktop app instead of opening a browser.
+- Quick offline demos and showcases.
 
-## 🚀 使用步骤
+## 🚀 How to use
 
-1. 打开 FengXia-Packer
-2. 选择你的入口文件（通常是 `index.html`）
-3. 点击打包，等待完成即可
+1. Open FengXia-Packer.
+2. Select your entry file (usually `index.html`).
+3. Click package and wait — you'll get a ready-to-share `.exe`.
 
-## 🛠️ 技术栈
+## ⚠️ About the bundled HTML sample
 
-- 运行时：[NW.js](https://nwjs.io/)
-- 打包：nwjs-packager
+The demo HTML in this repo is **source code that talks to the editor through a custom in-app bridge (IPC)**. It is **not** meant to be opened directly in a normal browser. If you want to run it outside FengXia-Packer, you must adapt the bridge calls yourself — a plain browser has no access to that bridge.
 
-## 📄 开源说明
+## 🛠️ Tech stack
 
-本项目仅供学习交流，请勿用于打包未经授权的第三方内容。
+- Runtime: [NW.js](https://nwjs.io/)
+- Packager: nwjs-packager
+
+## 📄 Disclaimer
+
+This project is for learning and personal use only. Do not package content you do not own or have the right to distribute.
 
 ---
 
 <div align="center">
 
-由 <b>风夏工作室 · Fengxia Studio</b> 开发 · 中国
+Developed by <b>Fengxia Studio</b> · China
 
 </div>
