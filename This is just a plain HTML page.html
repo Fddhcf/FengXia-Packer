@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>凤夏打包器</title>
+<!-- CodeMirror（加载失败会自动降级为纯文本编辑） -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/javascript-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/css-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/xml-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{--bg:#000000;--card:#16181f;--card2:#101218;--line:#2a2f3a;--txt:#e8ecf1;--sub:#8a93a5;
+ --accent:#7fb2ff;--inputbg:#0d0f14;--btn:#1976d2;
+ font-family:"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);font-size:14px;
+ display:flex;flex-direction:column;max-width:520px;margin:0 auto}
+body.white{--bg:#ffffff;--card:#f2f4f8;--card2:#e8ecf2;--line:#d4dae2;--txt:#1a1d26;--sub:#6a7382;
+ --accent:#1976d2;--inputbg:#ffffff;--btn:#1976d2}
+.appbar{background:var(--bg);padding:14px 16px;display:flex;align-items:center;gap:12px;
+ border-bottom:1px solid var(--line);flex-shrink:0}
+.appbar .logo{width:30px;height:30px;border-radius:8px}
+.appbar h1{font-size:19px;font-weight:600;flex:1}
+.iconbtn{background:none;border:none;color:var(--txt);font-size:13px;cursor:pointer;
+ width:38px;height:38px;border-radius:50%}
+.iconbtn:active{background:var(--card2)}
+.main{flex:1;overflow-y:auto;padding:14px}
+.hint{background:var(--card2);border-radius:12px;padding:12px 14px;font-size:12px;color:var(--sub);
+ line-height:1.7;margin-bottom:6px}
+.hint b{color:var(--accent)}
+.proj{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px;
+ display:flex;align-items:center;gap:14px;cursor:pointer}
+.proj:active{background:var(--card2)}
+.proj .picon{width:46px;height:46px;border-radius:12px;background:var(--inputbg);display:flex;
+ align-items:center;justify-content:center;font-size:12px;color:var(--accent);font-weight:bold;flex-shrink:0}
+.proj .info{flex:1;min-width:0}
+.proj .nm{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj .tm{font-size:12px;color:var(--sub);margin-top:3px}
+.proj .arrow{color:var(--sub);font-size:18px}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:50px 0}
+.fab{position:fixed;right:22px;bottom:28px;width:56px;height:56px;border-radius:50%;
+ background:var(--btn);color:#fff;border:none;font-size:24px;cursor:pointer;
+ box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:10}
+.fab:active{opacity:.85}
+.filebar{display:flex;gap:8px;overflow-x:auto;padding:10px 0;flex-shrink:0}
+.chip{background:var(--card);border-radius:20px;padding:7px 15px;font-size:13px;white-space:nowrap;
+ cursor:pointer;border:1px solid var(--line)}
+.chip.add{color:var(--accent)}
+.chip:active{background:var(--card2)}
+.fileitem{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:12px;
+ padding:11px 14px;margin-bottom:8px}
+.fileitem .ficon{font-size:12px;color:var(--accent);font-weight:bold;min-width:38px}
+.fileitem .fname{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fileitem .fsize{font-size:11px;color:var(--sub)}
+.fileitem .fdel{color:#e57373;background:none;border:none;font-size:12px;padding:4px 8px}
+.fileitem .fedit{color:var(--accent);background:none;border:none;font-size:12px;padding:4px 8px}
+.setcard{background:var(--card);border-radius:14px;padding:14px 16px;margin-top:4px}
+.setcard h3{font-size:13px;color:var(--accent);margin-bottom:10px}
+label{display:block;font-size:12px;color:var(--sub);margin:8px 0 4px}
+input{width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--line);
+ background:var(--inputbg);color:var(--txt);font-size:14px}
+.row{display:flex;gap:8px}.row>div{flex:1}
+.bigbtn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;
+ font-weight:bold;cursor:pointer;margin-top:12px;color:#fff;background:var(--btn)}
+.bigbtn:active{opacity:.85}
+.bigbtn:disabled{opacity:.4}
+.plain{background:var(--card2);color:var(--txt);font-weight:normal;font-size:13px;padding:10px}
+.danger{background:#3a2430;color:#e57373;font-weight:normal;font-size:13px;padding:10px}
+body.white .danger{background:#fdecec}
+#log{background:var(--inputbg);border-radius:10px;padding:11px;font-size:11px;font-family:Consolas,monospace;
+ max-height:160px;overflow-y:auto;color:#9ecb9e;margin-top:10px;display:none;white-space:pre-wrap;
+ line-height:1.6;word-break:break-all}
+#init{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
+ justify-content:center;align-items:center;z-index:99;padding:28px;text-align:center}
+#init .logo{width:72px;height:72px;border-radius:16px}
+#pbarWrap{width:100%;max-width:300px;height:8px;background:var(--card2);border-radius:5px;
+ margin-top:18px;overflow:hidden;display:none}
+#pbar{height:100%;width:0%;background:var(--btn);border-radius:5px;transition:width .3s}
+#pct{font-size:11px;color:var(--sub);margin-top:6px;white-space:pre-wrap}
+.page{display:none;flex-direction:column;flex:1;min-height:0}
+/* 应用内弹窗 */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:50;
+ justify-content:center;align-items:center;padding:24px}
+.dlg{background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:340px;
+ max-height:80vh;overflow-y:auto}
+.dlg h3{font-size:16px;margin-bottom:14px}
+.dlg .opt{background:var(--inputbg);border-radius:10px;padding:12px 14px;margin-bottom:8px;
+ font-size:14px;cursor:pointer;border:1px solid var(--line)}
+.dlg .opt:active{background:var(--card2)}
+.dlg .opt b{color:var(--accent)}
+.dlg .opt small{display:block;color:var(--sub);font-size:11px;margin-top:3px}
+.dlg .opt.warn{border-color:#5a3a3a}.dlg .opt.warn b{color:#e57373}
+.dlg .opt.sel{border-color:var(--btn)}
+/* 设置开关行 */
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;
+ border-bottom:1px solid var(--line)}
+.setrow:last-child{border-bottom:none}
+.setrow .st{font-size:14px}
+.setrow .sd{font-size:11px;color:var(--sub);margin-top:2px}
+.setrow .cur{font-size:13px;color:var(--accent)}
+.tgl{width:46px;height:26px;border-radius:13px;background:var(--card2);position:relative;
+ cursor:pointer;border:1px solid var(--line);flex-shrink:0}
+.tgl.on{background:var(--btn);border-color:var(--btn)}
+.tgl::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+ background:#fff;transition:left .2s}
+.tgl.on::after{left:22px}
+/* 编辑器 */
+#editorPage{background:var(--inputbg)}
+.edbar{display:flex;align-items:center;gap:4px;padding:6px 10px;border-bottom:1px solid var(--line);
+ background:var(--bg);flex-shrink:0}
+.edbar .fname{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ color:var(--sub)}
+.edbar .save{background:var(--btn);color:#fff;border:none;border-radius:8px;padding:7px 16px;
+ font-size:13px;font-weight:bold;cursor:pointer}
+#edWrap{flex:1;min-height:0}
+#edWrap .CodeMirror{height:100%;font-family:Consolas,"Courier New",monospace}
+body:not(.white) #edWrap .CodeMirror{background:var(--inputbg);color:#e8ecf1}
+#plainEd{width:100%;height:100%;border:none;background:var(--inputbg);color:var(--txt);
+ font-family:Consolas,monospace;font-size:13px;padding:10px;resize:none;outline:none}
+</style>
+</head>
+<body>
+
+<!-- 应用内弹窗 -->
+<div class="mask" id="dlgMask">
+  <div class="dlg">
+    <h3 id="dlgTitle"></h3>
+    <div id="dlgOpts"></div>
+  </div>
+</div>
+
+<!-- 启动页 -->
+<div id="init">
+  <img class="logo" src="logo.png" onerror="this.style.display='none'">
+  <div style="font-size:17px;margin-top:14px" id="initMsg">凤夏打包器</div>
+  <div style="color:var(--sub);font-size:12px;margin-top:8px" id="initSub">正在启动…</div>
+  <div id="pbarWrap"><div id="pbar"></div></div>
+  <div id="pct"></div>
+  <button class="bigbtn" id="initBtn" style="display:none;max-width:260px"></button>
+  <button class="bigbtn plain" id="initBtn2" style="display:none;max-width:260px"></button>
+</div>
+
+<!-- 首页 -->
+<div class="page" id="home">
+  <div class="appbar">
+    <img class="logo" src="logo.png" onerror="this.style.display='none'">
+    <h1 id="homeTitle">凤夏打包器</h1>
+    <button class="iconbtn" onclick="openSettings()" id="btnSet1">设置</button>
+  </div>
+  <div class="main">
+    <div class="hint" id="homeHint"></div>
+    <div id="rtInfo" class="hint" style="cursor:pointer" onclick="manageRuntime()"></div>
+    <div id="projList"></div>
+  </div>
+  <button class="fab" onclick="newProject()">+</button>
+</div>
+
+<!-- 项目详情 -->
+<div class="page" id="proj">
+  <div class="appbar">
+    <button class="iconbtn" onclick="goHome()">←</button>
+    <h1 id="pTitle" style="font-size:17px"></h1>
+    <button class="iconbtn" onclick="openSettings()" id="btnSet2">设置</button>
+  </div>
+  <div class="filebar">
+    <div class="chip add" onclick="addFile()" id="chipAdd"></div>
+    <div class="chip" onclick="refreshFiles()" id="chipRefresh"></div>
+    <div class="chip" onclick="openExeHint()" id="chipHint"></div>
+  </div>
+  <div class="main">
+    <div id="files"></div>
+    <div class="setcard">
+      <h3 id="secAppSet"></h3>
+      <label id="lblAppName"></label><input id="appName">
+      <div class="row">
+        <div><label id="lblWinW"></label><input id="winW" value="1280"></div>
+        <div><label id="lblWinH"></label><input id="winH" value="800"></div>
+      </div>
+      <button class="bigbtn plain" onclick="pickIcon()" id="btnIcon"></button>
+      <div id="iconName" style="font-size:11px;color:var(--sub);margin-top:6px"></div>
+      <button class="bigbtn" onclick="doPack()" id="btnPack"></button>
+      <div id="packNote" style="font-size:11px;color:var(--sub);margin-top:8px;line-height:1.6"></div>
+      <button class="bigbtn danger" onclick="delProject()" id="btnDel"></button>
+      <div id="log"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 代码编辑器 -->
+<div class="page" id="editorPage">
+  <div class="edbar">
+    <button class="iconbtn" onclick="closeEditor()">←</button>
+    <div class="fname" id="edName"></div>
+    <button class="save" onclick="saveEditor()" id="btnSave"></button>
+  </div>
+  <div id="edWrap"></div>
+</div>
+
+<!-- 设置页 -->
+<div class="page" id="setPage">
+  <div class="appbar">
+    <button class="iconbtn" onclick="closeSettings()">←</button>
+    <h1 style="font-size:17px" id="setTitle"></h1>
+  </div>
+  <div class="main">
+    <div class="setcard">
+      <h3 id="secLang"></h3>
+      <div class="setrow" onclick="pickLanguage()" style="cursor:pointer">
+        <div><div class="st" id="stLang"></div><div class="sd" id="stLangD"></div></div>
+        <div class="cur" id="langCur"></div>
+      </div>
+    </div>
+    <div class="setcard" style="margin-top:10px">
+      <h3 id="secAppear"></h3>
+      <div class="setrow">
+        <div><div class="st" id="stTheme"></div><div class="sd" id="stThemeD"></div></div>
+        <div class="tgl" id="tglTheme" onclick="toggleTheme()"></div>
+      </div>
+    </div>
+    <div class="setcard" style="margin-top:10px">
+      <h3 id="secEditor"></h3>
+      <div class="setrow">
+        <div><div class="st" id="stWrap"></div><div class="sd" id="stWrapD"></div></div>
+        <div class="tgl" id="tglWrap" onclick="toggleSet('wrap',this)"></div>
+      </div>
+      <div class="setrow">
+        <div><div class="st" id="stHint"></div><div class="sd" id="stHintD"></div></div>
+        <div class="tgl" id="tglHint" onclick="toggleSet('hint',this)"></div>
+      </div>
+      <label id="lblFont"></label>
+      <input id="setFont" type="number" value="14" onchange="saveFontSize(this.value)">
+    </div>
+    <div class="setcard" style="margin-top:10px">
+      <h3 id="secMaint"></h3>
+      <button class="bigbtn plain" onclick="doCleanup()" id="btnClean"></button>
+      <div style="font-size:11px;color:var(--sub);margin-top:8px" id="cleanNote"></div>
+      <div style="font-size:11px;color:var(--sub);margin-top:12px;line-height:1.7" id="verNote"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== 全局错误捕获 ===== */
+window.onerror=function(msg,src,line,col){
+ var el=document.getElementById("initSub");
+ if(el&&document.getElementById("init").style.display!=="none")
+  el.textContent=T("errBoot")+line+": "+msg;
+ return false;
+};
+
+const $=id=>document.getElementById(id);
+const ROOT="/storage/emulated/0/凤夏打包器";
+const APPVER="v2.1.3";
+
+/* ===== 多语言系统（八国语言）===== */
+const LANGS={
+ zh:{label:"简体中文",note:"中文（默认）"},
+ en:{label:"English",note:"English (UK / US)"},
+ es:{label:"Español",note:"Spanish"},
+ fr:{label:"Français",note:"French"},
+ de:{label:"Deutsch",note:"German"},
+ ja:{label:"日本語",note:"Japanese"},
+ ru:{label:"Русский",note:"Russian"},
+ pt:{label:"Português",note:"Portuguese (BR / PT)"}
+};
+
+const I18N={
+zh:{app:"凤夏打包器",boot:"正在启动…",conn:"正在连接调用桥…",noBridge:"无法连接调用桥",
+ bridgeFail:"请以 APK 方式运行",noExt:"调用桥 ext 模块不可用",preview:"可能当前是预览模式，请打包成 APK 后测试",
+ needPerm:"需要「所有文件访问」权限",goPerm:"去开启权限",initing:"正在初始化…",
+ firstUse:"首次使用",firstUseD:"可先进入应用，新建项目时按需下载模板",enter:"进入应用",
+ dl7:"现在下载 Win7 模板（约80MB）",back:"返回",
+ homeHint:"把你的网页打包成 <b>Windows 双击即用</b> 的程序。<br>内置代码编辑器 · 新建项目可选 <b>Win7</b> / <b>Win10/11</b> 运行时。",
+ rtTpl:"运行时模板",dl:"已下载",noDl:"未下载",manage:"（点此管理）",
+ noProj:"还没有项目<br>点右下角 [+] 新建",settings:"设置",
+ addFile:"+ 添加文件",refresh:"刷新",runHint:"试运行说明",
+ secApp:"应用与图标设置",lblName:"应用名称（窗口标题）",lblW:"窗口宽",lblH:"窗口高",
+ pickIcon:"自定义窗口图标",iconSet:"图标：icon.png（打包时生效）",iconNone:"未设置图标（使用默认）",
+ pack:"一键打包并分享",packNote:"打包时自动生成配置（package.json），无需手动管理。<br>图标会应用于窗口标题栏 / 任务栏；EXE 文件本体图标需在电脑上用 Resource Hacker 修改。<br>（打包只清理临时文件，你的项目数据全程保留）",
+ delProj:"删除此项目",secLang:"语言 / Language",stLang:"应用界面语言",stLangD:"切换后立即生效",
+ secAppear:"外观",stTheme:"主题",stThemeD:"纯黑 / 纯白",
+ secEditor:"代码编辑器",stWrap:"自动换行",stWrapD:"长行折行显示",
+ stHint:"自动补全",stHintD:"输入时弹出代码提示",lblFont:"编辑器字号（px）",
+ secMaint:"维护",btnClean:"清理临时文件",cleanNote:"只清理打包/创建过程中产生的中转文件，不影响项目数据。",
+ verNote:"凤夏打包器 "+APPVER+"<br>凤夏工作室出品 · 内置代码编辑 · 双运行时打包 · 八国语言",
+ tDark:"已切换到纯黑主题",tWhite:"已切换到纯白主题",langOK:"语言已切换",
+ pickLangTitle:"选择语言",cur:"当前",tapSwitch:"点击切换",save:"保存",edit:"编辑",del:"删除",dir:"文件夹",
+ target:"目标系统",editTip:"点文件名可编辑代码",noFiles:"还没有素材文件<br>点上方「+ 添加文件」上传",
+ projName:"给项目起个名字：",sameName:"已存在同名项目",
+ pickSys:"选择目标系统",rec:"推荐",old:"兼容老电脑",cancel:"取消",
+ needDl:"需要下载模板",dlNow:"下载",dlDesc:"完成后自动继续",
+ creating:"正在创建项目",unzip:"解压运行时模板中…",rename:"重命名目录…",done:"完成",
+ createOK:"项目创建成功",createFail:"创建失败",noExe:"解压后没找到 nw.exe",
+ dlTitle:"正在下载",dlSize:"约80~120MB",dlOK:"模板下载完成",dlFail:"下载失败",retry:"重试下载",enterFirst:"先进入应用",
+ hasDl:"已下载 · 点击管理",noDlD:"未下载 · 点击下载",redl:"重新下载（覆盖）",delTpl:"删除模板（省空间）",
+ deleting:"正在删除…",deleted:"已删除",
+ exeHint:"试运行方法：\n\n1. 用「一键打包并分享」生成 ZIP\n2. 发到对应系统的电脑解压\n3. 双击 EXE 查看效果\n\nEXE 文件本体图标：如需修改，可在电脑上用 Resource Hacker 等工具替换（窗口/任务栏图标已支持在应用内自定义）",
+ delConfirm:"确定删除整个项目「{n}」？\n\n素材文件将被彻底删除，无法恢复！",
+ delFile:"删除 {n} ？",added:"已添加 ",tooBig:"文件超过15MB，暂不支持",addFail:"添加失败：",
+ iconOK:"图标已设置，打包时生效",iconFail:"设置图标失败：",readFail:"读取失败：",
+ saved:"已保存 ",saveFail:"保存失败：",cleaning:"正在清理…",cleanOK:"清理完成",
+ noIndex:"缺少 index.html（主页），请先创建或添加",noTpl:"本项目的 {n} 模板已被删除，无法打包；可到首页重新下载",
+ startPack:"开始打包 {n}（{r} {v}）…",genPkg:"生成 package.json",genPkgIco:"生成 package.json（含自定义图标）",
+ collect:"收集素材 {n} 项",genNw:"生成 {n}.nw",packed:"打包完成：{s}，唤起分享…",
+ packDone:"完成。ZIP 已保留在 凤夏打包器 文件夹。",packFind:"已生成 {p}，可在文件管理器中找到。",
+ packFailTip:"提示：打包失败不会影响项目文件，可修正后重试。",packFail:"打包失败，详见日志",
+ zipFail:"压缩 .nw 失败：",zipFail2:"打包 ZIP 失败：",logErr:"[错误] ",logOK:"[OK] ",
+ downloading:"下载中",errBoot:"启动出错 第",errUnknown:"未知错误",
+ dlWin:"下载中 {p}%"},
+en:{app:"FengXia Packer",boot:"Starting…",conn:"Connecting to bridge…",noBridge:"Cannot connect to bridge",
+ bridgeFail:"Please run as APK",noExt:"Bridge ext module unavailable",preview:"Preview mode? Please build as APK to test",
+ needPerm:"All files access permission required",goPerm:"Grant Permission",initing:"Initializing…",
+ firstUse:"First Use",firstUseD:"You can enter first; download templates when creating projects",enter:"Enter App",
+ dl7:"Download Win7 template now (~80MB)",back:"Back",
+ homeHint:"Pack your web pages into <b>double-click Windows programs</b>.<br>Built-in code editor · New projects can use <b>Win7</b> / <b>Win10/11</b> runtime.",
+ rtTpl:"Runtime templates",dl:"Downloaded",noDl:"Not downloaded",manage:"(tap to manage)",
+ noProj:"No projects yet<br>Tap [+] bottom right to create",settings:"Settings",
+ addFile:"+ Add File",refresh:"Refresh",runHint:"Test Run Guide",
+ secApp:"App & Icon Settings",lblName:"App Name (window title)",lblW:"Width",lblH:"Height",
+ pickIcon:"Custom Window Icon",iconSet:"Icon: icon.png (applied on pack)",iconNone:"No icon set (default)",
+ pack:"Pack & Share",packNote:"package.json is generated automatically when packing.<br>Icon applies to window title bar / taskbar; the EXE file icon itself needs Resource Hacker on a PC.<br>(Packing only cleans temp files; your project data is kept)",
+ delProj:"Delete Project",secLang:"Language",stLang:"App language",stLangD:"Takes effect immediately",
+ secAppear:"Appearance",stTheme:"Theme",stThemeD:"Pure black / Pure white",
+ secEditor:"Code Editor",stWrap:"Auto wrap",stWrapD:"Wrap long lines",
+ stHint:"Auto complete",stHintD:"Show code hints while typing",lblFont:"Editor font size (px)",
+ secMaint:"Maintenance",btnClean:"Clean temporary files",cleanNote:"Only cleans intermediate files; project data is untouched.",
+ verNote:"FengXia Packer "+APPVER+"<br>by FengXia Studio · Built-in editor · Dual runtime · 8 languages",
+ tDark:"Switched to pure black theme",tWhite:"Switched to pure white theme",langOK:"Language changed",
+ pickLangTitle:"Select Language",cur:"Current",tapSwitch:"Tap to switch",save:"Save",edit:"Edit",del:"Delete",dir:"Folder",
+ target:"Target system",editTip:"Tap file name to edit code",noFiles:"No asset files yet<br>Tap \"+ Add File\" above",
+ projName:"Project name:",sameName:"Project name already exists",
+ pickSys:"Choose Target System",rec:"Recommended",old:"For old PCs",cancel:"Cancel",
+ needDl:"Template download required",dlNow:"Download",dlDesc:"Continues automatically when done",
+ creating:"Creating project",unzip:"Extracting runtime template…",rename:"Renaming directory…",done:"Done",
+ createOK:"Project created",createFail:"Create failed",noExe:"nw.exe not found after extraction",
+ dlTitle:"Downloading",dlSize:"~80-120MB",dlOK:"Template downloaded",dlFail:"Download failed",retry:"Retry download",enterFirst:"Enter app first",
+ hasDl:"Downloaded · tap to manage",noDlD:"Not downloaded · tap to download",redl:"Re-download (overwrite)",delTpl:"Delete template (save space)",
+ deleting:"Deleting…",deleted:"Deleted",
+ exeHint:"How to test run:\n\n1. Use \"Pack & Share\" to create a ZIP\n2. Send to a matching PC and extract\n3. Double-click the EXE\n\nEXE file icon: modify on PC with Resource Hacker if needed",
+ delConfirm:"Delete the whole project \"{n}\"?\n\nAsset files will be permanently removed!",
+ delFile:"Delete {n} ?",added:"Added ",tooBig:"File exceeds 15MB, not supported",addFail:"Add failed: ",
+ iconOK:"Icon set, applies on pack",iconFail:"Set icon failed: ",readFail:"Read failed: ",
+ saved:"Saved ",saveFail:"Save failed: ",cleaning:"Cleaning…",cleanOK:"Cleaned",
+ noIndex:"Missing index.html (main page), please create or add it first",noTpl:"The {n} template was deleted, cannot pack; re-download from home page",
+ startPack:"Packing {n} ({r} {v})…",genPkg:"Generated package.json",genPkgIco:"Generated package.json (with icon)",
+ collect:"Collected {n} items",genNw:"Generated {n}.nw",packed:"Packed: {s}, sharing…",
+ packDone:"Done. ZIP kept in the FengXia Packer folder.",packFind:"Generated {p}, find it in file manager.",
+ packFailTip:"Tip: failed packing does not affect project files; fix and retry.",packFail:"Pack failed, see log",
+ zipFail:"Failed to zip .nw: ",zipFail2:"Failed to pack ZIP: ",logErr:"[Error] ",logOK:"[OK] ",
+ downloading:"Downloading",errBoot:"Boot error line ",errUnknown:"Unknown error",
+ dlWin:"Downloading {p}%"},
+es:{app:"Empaquetador FengXia",boot:"Iniciando…",conn:"Conectando al puente…",noBridge:"No se puede conectar al puente",
+ bridgeFail:"Ejecute como APK",noExt:"Módulo ext no disponible",preview:"¿Modo vista previa? Compile como APK para probar",
+ needPerm:"Se requiere acceso a todos los archivos",goPerm:"Conceder permiso",initing:"Inicializando…",
+ firstUse:"Primer uso",firstUseD:"Puede entrar primero; descargue plantillas al crear proyectos",enter:"Entrar",
+ dl7:"Descargar plantilla Win7 (~80MB)",back:"Volver",
+ homeHint:"Convierte tus páginas web en <b>programas de Windows de doble clic</b>.<br>Editor integrado · Runtime <b>Win7</b> / <b>Win10/11</b>.",
+ rtTpl:"Plantillas de runtime",dl:"Descargada",noDl:"No descargada",manage:"(tocar para gestionar)",
+ noProj:"Aún no hay proyectos<br>Toque [+] para crear",settings:"Ajustes",
+ addFile:"+ Añadir archivo",refresh:"Actualizar",runHint:"Guía de prueba",
+ secApp:"Ajustes de app e icono",lblName:"Nombre de app (título)",lblW:"Ancho",lblH:"Alto",
+ pickIcon:"Icono de ventana personalizado",iconSet:"Icono: icon.png (al empaquetar)",iconNone:"Sin icono (predeterminado)",
+ pack:"Empaquetar y compartir",packNote:"package.json se genera automáticamente.<br>El icono se aplica a barra de título / barra de tareas; el icono del EXE requiere Resource Hacker en PC.<br>(Solo limpia archivos temporales)",
+ delProj:"Eliminar proyecto",secLang:"Idioma",stLang:"Idioma de la app",stLangD:"Efecto inmediato",
+ secAppear:"Apariencia",stTheme:"Tema",stThemeD:"Negro puro / Blanco puro",
+ secEditor:"Editor de código",stWrap:"Ajuste de línea",stWrapD:"Envolver líneas largas",
+ stHint:"Autocompletado",stHintD:"Sugerencias al escribir",lblFont:"Tamaño de fuente (px)",
+ secMaint:"Mantenimiento",btnClean:"Limpiar temporales",cleanNote:"Solo limpia archivos intermedios; los proyectos no se afectan.",
+ verNote:"Empaquetador FengXia "+APPVER+"<br>por FengXia Studio · Editor integrado · Doble runtime · 8 idiomas",
+ tDark:"Tema negro activado",tWhite:"Tema blanco activado",langOK:"Idioma cambiado",
+ pickLangTitle:"Seleccionar idioma",cur:"Actual",tapSwitch:"Toque para cambiar",save:"Guardar",edit:"Editar",del:"Eliminar",dir:"Carpeta",
+ target:"Sistema destino",editTip:"Toque el nombre para editar",noFiles:"Aún no hay archivos<br>Toque «+ Añadir archivo»",
+ projName:"Nombre del proyecto:",sameName:"Ya existe un proyecto con ese nombre",
+ pickSys:"Elegir sistema destino",rec:"Recomendado",old:"Para PC antiguos",cancel:"Cancelar",
+ needDl:"Descarga de plantilla requerida",dlNow:"Descargar",dlDesc:"Continúa automáticamente",
+ creating:"Creando proyecto",unzip:"Extrayendo plantilla…",rename:"Renombrando…",done:"Hecho",
+ createOK:"Proyecto creado",createFail:"Error al crear",noExe:"nw.exe no encontrado",
+ dlTitle:"Descargando",dlSize:"~80-120MB",dlOK:"Plantilla descargada",dlFail:"Error de descarga",retry:"Reintentar",enterFirst:"Entrar primero",
+ hasDl:"Descargada · tocar para gestionar",noDlD:"No descargada · tocar para descargar",redl:"Volver a descargar",delTpl:"Eliminar plantilla",
+ deleting:"Eliminando…",deleted:"Eliminado",
+ exeHint:"Cómo probar:\n\n1. Use «Empaquetar y compartir» para crear ZIP\n2. Envíe a un PC y extraiga\n3. Doble clic en el EXE\n\nIcono del EXE: modifíquelo en PC con Resource Hacker",
+ delConfirm:"¿Eliminar todo el proyecto «{n}»?\n\n¡Los archivos se borrarán permanentemente!",
+ delFile:"¿Eliminar {n} ?",added:"Añadido ",tooBig:"Archivo mayor de 15MB",addFail:"Error al añadir: ",
+ iconOK:"Icono establecido",iconFail:"Error al establecer icono: ",readFail:"Error de lectura: ",
+ saved:"Guardado ",saveFail:"Error al guardar: ",cleaning:"Limpiando…",cleanOK:"Limpieza completa",
+ noIndex:"Falta index.html (página principal)",noTpl:"La plantilla {n} fue eliminada; vuelva a descargarla",
+ startPack:"Empaquetando {n} ({r} {v})…",genPkg:"package.json generado",genPkgIco:"package.json generado (con icono)",
+ collect:"{n} elementos recopilados",genNw:"Generado {n}.nw",packed:"Empaquetado: {s}, compartiendo…",
+ packDone:"Hecho. ZIP guardado en la carpeta FengXia.",packFind:"Generado {p}, búsquelo en el gestor de archivos.",
+ packFailTip:"Nota: el fallo no afecta a los archivos del proyecto.",packFail:"Error al empaquetar, ver registro",
+ zipFail:"Error al comprimir .nw: ",zipFail2:"Error al empaquetar ZIP: ",logErr:"[Error] ",logOK:"[OK] ",
+ downloading:"Descargando",errBoot:"Error de arranque línea ",errUnknown:"Error desconocido",
+ dlWin:"Descargando {p}%"},
+fr:{app:"Empaqueteur FengXia",boot:"Démarrage…",conn:"Connexion au pont…",noBridge:"Connexion impossible au pont",
+ bridgeFail:"Veuillez exécuter en APK",noExt:"Module ext indisponible",preview:"Mode aperçu ? Compilez en APK pour tester",
+ needPerm:"Accès à tous les fichiers requis",goPerm:"Accorder",initing:"Initialisation…",
+ firstUse:"Première utilisation",firstUseD:"Vous pouvez entrer d'abord; téléchargez les modèles à la création",enter:"Entrer",
+ dl7:"Télécharger le modèle Win7 (~80 Mo)",back:"Retour",
+ homeHint:"Convertissez vos pages web en <b>programmes Windows double-clic</b>.<br>Éditeur intégré · Runtime <b>Win7</b> / <b>Win10/11</b>.",
+ rtTpl:"Modèles runtime",dl:"Téléchargé",noDl:"Non téléchargé",manage:"(toucher pour gérer)",
+ noProj:"Aucun projet<br>Touchez [+] pour créer",settings:"Paramètres",
+ addFile:"+ Ajouter fichier",refresh:"Actualiser",runHint:"Guide de test",
+ secApp:"App et icône",lblName:"Nom de l'app (titre)",lblW:"Largeur",lblH:"Hauteur",
+ pickIcon:"Icône de fenêtre personnalisée",iconSet:"Icône : icon.png (au paquet)",iconNone:"Aucune icône (défaut)",
+ pack:"Empaqueter et partager",packNote:"package.json généré automatiquement.<br>L'icône s'applique à la barre de titre / barre des tâches ; l'icône EXE nécessite Resource Hacker sur PC.<br>(Seuls les fichiers temporaires sont nettoyés)",
+ delProj:"Supprimer le projet",secLang:"Langue",stLang:"Langue de l'app",stLangD:"Effet immédiat",
+ secAppear:"Apparence",stTheme:"Thème",stThemeD:"Noir pur / Blanc pur",
+ secEditor:"Éditeur de code",stWrap:"Retour à la ligne",stWrapD:"Replier les longues lignes",
+ stHint:"Complétion auto",stHintD:"Suggestions pendant la frappe",lblFont:"Taille de police (px)",
+ secMaint:"Maintenance",btnClean:"Nettoyer les temporaires",cleanNote:"Nettoie uniquement les fichiers intermédiaires ; les projets sont préservés.",
+ verNote:"Empaqueteur FengXia "+APPVER+"<br>par FengXia Studio · Éditeur intégré · Double runtime · 8 langues",
+ tDark:"Thème noir activé",tWhite:"Thème blanc activé",langOK:"Langue modifiée",
+ pickLangTitle:"Choisir la langue",cur:"Actuel",tapSwitch:"Toucher pour changer",save:"Enregistrer",edit:"Modifier",del:"Supprimer",dir:"Dossier",
+ target:"Système cible",editTip:"Touchez le nom pour éditer",noFiles:"Aucun fichier<br>Touchez « + Ajouter fichier »",
+ projName:"Nom du projet :",sameName:"Un projet porte déjà ce nom",
+ pickSys:"Choisir le système cible",rec:"Recommandé",old:"Pour vieux PC",cancel:"Annuler",
+ needDl:"Téléchargement du modèle requis",dlNow:"Télécharger",dlDesc:"Continue automatiquement",
+ creating:"Création du projet",unzip:"Extraction du modèle…",rename:"Renommage…",done:"Terminé",
+ createOK:"Projet créé",createFail:"Échec de création",noExe:"nw.exe introuvable",
+ dlTitle:"Téléchargement",dlSize:"~80-120 Mo",dlOK:"Modèle téléchargé",dlFail:"Échec du téléchargement",retry:"Réessayer",enterFirst:"Entrer d'abord",
+ hasDl:"Téléchargé · toucher pour gérer",noDlD:"Non téléchargé · toucher pour télécharger",redl:"Re-télécharger",delTpl:"Supprimer le modèle",
+ deleting:"Suppression…",deleted:"Supprimé",
+ exeHint:"Test :\n\n1. Utilisez « Empaqueter et partager » pour créer un ZIP\n2. Envoyez sur un PC et extrayez\n3. Double-cliquez sur l'EXE\n\nIcône EXE : modifiez-la sur PC avec Resource Hacker",
+ delConfirm:"Supprimer tout le projet « {n} » ?\n\nLes fichiers seront définitivement supprimés !",
+ delFile:"Supprimer {n} ?",added:"Ajouté ",tooBig:"Fichier > 15 Mo non pris en charge",addFail:"Échec : ",
+ iconOK:"Icône définie",iconFail:"Échec de l'icône : ",readFail:"Échec de lecture : ",
+ saved:"Enregistré ",saveFail:"Échec : ",cleaning:"Nettoyage…",cleanOK:"Nettoyé",
+ noIndex:"index.html (page principale) manquant",noTpl:"Le modèle {n} a été supprimé; re-téléchargez-le",
+ startPack:"Empaquetage de {n} ({r} {v})…",genPkg:"package.json généré",genPkgIco:"package.json généré (avec icône)",
+ collect:"{n} éléments collectés",genNw:"Généré {n}.nw",packed:"Empaqueté : {s}, partage…",
+ packDone:"Terminé. ZIP conservé dans le dossier FengXia.",packFind:"Généré {p}, voir le gestionnaire de fichiers.",
+ packFailTip:"Note : l'échec n'affecte pas les fichiers du projet.",packFail:"Échec, voir le journal",
+ zipFail:"Échec compression .nw : ",zipFail2:"Échec empaquetage ZIP : ",logErr:"[Erreur] ",logOK:"[OK] ",
+ downloading:"Téléchargement",errBoot:"Erreur démarrage ligne ",errUnknown:"Erreur inconnue",
+ dlWin:"Téléchargement {p}%"},
+de:{app:"FengXia Packer",boot:"Starte…",conn:"Verbinde mit Bridge…",noBridge:"Bridge nicht erreichbar",
+ bridgeFail:"Bitte als APK ausführen",noExt:"Bridge-Ext-Modul nicht verfügbar",preview:"Vorschau-Modus? Als APK bauen zum Testen",
+ needPerm:"Alle-Dateien-Zugriff erforderlich",goPerm:"Berechtigung erteilen",initing:"Initialisiere…",
+ firstUse:"Erste Nutzung",firstUseD:"App zuerst betreten; Vorlagen beim Erstellen laden",enter:"App betreten",
+ dl7:"Win7-Vorlage jetzt laden (~80MB)",back:"Zurück",
+ homeHint:"Verpacke Webseiten in <b>doppelklick-fähige Windows-Programme</b>.<br>Integrierter Editor · <b>Win7</b> / <b>Win10/11</b> Runtime.",
+ rtTpl:"Runtime-Vorlagen",dl:"Geladen",noDl:"Nicht geladen",manage:"(tippen zum Verwalten)",
+ noProj:"Noch keine Projekte<br>Tippe rechts unten auf [+]",settings:"Einstellungen",
+ addFile:"+ Datei hinzufügen",refresh:"Aktualisieren",runHint:"Testanleitung",
+ secApp:"App & Symbol",lblName:"App-Name (Titel)",lblW:"Breite",lblH:"Höhe",
+ pickIcon:"Eigenes Fenstersymbol",iconSet:"Symbol: icon.png (beim Packen)",iconNone:"Kein Symbol (Standard)",
+ pack:"Packen & Teilen",packNote:"package.json wird automatisch erzeugt.<br>Symbol gilt für Titelleiste / Taskleiste; EXE-Symbol braucht Resource Hacker am PC.<br>(Nur Temp-Dateien werden bereinigt)",
+ delProj:"Projekt löschen",secLang:"Sprache",stLang:"App-Sprache",stLangD:"Sofort wirksam",
+ secAppear:"Erscheinungsbild",stTheme:"Design",stThemeD:"Rein-Schwarz / Rein-Weiß",
+ secEditor:"Code-Editor",stWrap:"Zeilenumbruch",stWrapD:"Lange Zeilen umbrechen",
+ stHint:"Autovervollständigung",stHintD:"Vorschläge beim Tippen",lblFont:"Schriftgröße (px)",
+ secMaint:"Wartung",btnClean:"Temp-Dateien bereinigen",cleanNote:"Bereinigt nur Zwischendateien; Projektdaten bleiben erhalten.",
+ verNote:"FengXia Packer "+APPVER+"<br>von FengXia Studio · Integrierter Editor · Doppel-Runtime · 8 Sprachen",
+ tDark:"Rein-Schwarz aktiviert",tWhite:"Rein-Weiß aktiviert",langOK:"Sprache geändert",
+ pickLangTitle:"Sprache wählen",cur:"Aktuell",tapSwitch:"Zum Wechseln tippen",save:"Speichern",edit:"Bearbeiten",del:"Löschen",dir:"Ordner",
+ target:"Zielsystem",editTip:"Dateinamen antippen zum Bearbeiten",noFiles:"Noch keine Dateien<br>Oben auf \"+ Datei hinzufügen\" tippen",
+ projName:"Projektname:",sameName:"Name existiert bereits",
+ pickSys:"Zielsystem wählen",rec:"Empfohlen",old:"Für alte PCs",cancel:"Abbrechen",
+ needDl:"Vorlagen-Download nötig",dlNow:"Herunterladen",dlDesc:"Setzt automatisch fort",
+ creating:"Projekt wird erstellt",unzip:"Entpacke Vorlage…",rename:"Benenne um…",done:"Fertig",
+ createOK:"Projekt erstellt",createFail:"Erstellen fehlgeschlagen",noExe:"nw.exe nicht gefunden",
+ dlTitle:"Lädt herunter",dlSize:"~80-120MB",dlOK:"Vorlage geladen",dlFail:"Download fehlgeschlagen",retry:"Erneut versuchen",enterFirst:"Erst App betreten",
+ hasDl:"Geladen · tippen zum Verwalten",noDlD:"Nicht geladen · tippen zum Laden",redl:"Erneut laden (überschreiben)",delTpl:"Vorlage löschen",
+ deleting:"Lösche…",deleted:"Gelöscht",
+ exeHint:"Testlauf:\n\n1. Mit \"Packen & Teilen\" ZIP erstellen\n2. An passenden PC senden und entpacken\n3. EXE doppelklicken\n\nEXE-Symbol: am PC mit Resource Hacker ändern",
+ delConfirm:"Ganzes Projekt \"{n}\" löschen?\n\nDateien werden endgültig entfernt!",
+ delFile:"{n} löschen ?",added:"Hinzugefügt ",tooBig:"Datei > 15MB nicht unterstützt",addFail:"Fehler: ",
+ iconOK:"Symbol gesetzt",iconFail:"Symbolfehler: ",readFail:"Lesefehler: ",
+ saved:"Gespeichert ",saveFail:"Speicherfehler: ",cleaning:"Bereinige…",cleanOK:"Bereinigt",
+ noIndex:"index.html (Hauptseite) fehlt",noTpl:"Vorlage {n} wurde gelöscht; bitte neu laden",
+ startPack:"Packe {n} ({r} {v})…",genPkg:"package.json erzeugt",genPkgIco:"package.json erzeugt (mit Symbol)",
+ collect:"{n} Elemente gesammelt",genNw:"Erzeugt {n}.nw",packed:"Gepackt: {s}, teile…",
+ packDone:"Fertig. ZIP im Ordner FengXia.",packFind:"Erzeugt {p}, siehe Dateimanager.",
+ packFailTip:"Hinweis: Fehler betrifft Projektdateien nicht.",packFail:"Packen fehlgeschlagen, siehe Protokoll",
+ zipFail:".nw packen fehlgeschlagen: ",zipFail2:"ZIP packen fehlgeschlagen: ",logErr:"[Fehler] ",logOK:"[OK] ",
+ downloading:"Lädt",errBoot:"Startfehler Zeile ",errUnknown:"Unbekannter Fehler",
+ dlWin:"Lädt {p}%"},
+ja:{app:"鳳夏パッカー",boot:"起動中…",conn:"ブリッジに接続中…",noBridge:"ブリッジに接続できません",
+ bridgeFail:"APK として実行してください",noExt:"ext モジュールが利用できません",preview:"プレビューモードの可能性があります。APK 化してテストしてください",
+ needPerm:"「すべてのファイルへのアクセス」権限が必要です",goPerm:"権限を許可",initing:"初期化中…",
+ firstUse:"初回利用",firstUseD:"先にアプリに入り、作成時にテンプレートをダウンロードできます",enter:"アプリに入る",
+ dl7:"Win7 テンプレートを今ダウンロード（約80MB）",back:"戻る",
+ homeHint:"ウェブページを<b>ダブルクリックで動く Windows プログラム</b>に変換。<br>コードエディタ内蔵 · <b>Win7</b> / <b>Win10/11</b> ランタイム。",
+ rtTpl:"ランタイムテンプレート",dl:"ダウンロード済み",noDl:"未ダウンロード",manage:"（タップで管理）",
+ noProj:"まだプロジェクトがありません<br>右下の [+] で作成",settings:"設定",
+ addFile:"+ ファイル追加",refresh:"更新",runHint:"テスト実行ガイド",
+ secApp:"アプリとアイコン設定",lblName:"アプリ名（ウィンドウタイトル）",lblW:"幅",lblH:"高さ",
+ pickIcon:"カスタムウィンドウアイコン",iconSet:"アイコン：icon.png（パック時に適用）",iconNone:"アイコン未設定（デフォルト）",
+ pack:"パックして共有",packNote:"package.json は自動生成されます。<br>アイコンはタイトルバー / タスクバーに適用。EXE 本体のアイコンは PC で Resource Hacker が必要です。<br>（一時ファイルのみ削除）",
+ delProj:"プロジェクトを削除",secLang:"言語",stLang:"アプリの言語",stLangD:"すぐに反映されます",
+ secAppear:"外観",stTheme:"テーマ",stThemeD:"純黒 / 純白",
+ secEditor:"コードエディタ",stWrap:"自動折り返し",stWrapD:"長い行を折り返す",
+ stHint:"自動補完",stHintD:"入力時に候補を表示",lblFont:"フォントサイズ（px）",
+ secMaint:"メンテナンス",btnClean:"一時ファイルを削除",cleanNote:"中間ファイルのみ削除。プロジェクトデータには影響しません。",
+ verNote:"鳳夏パッカー "+APPVER+"<br>鳳夏スタジオ製 · エディタ内蔵 · デュアルランタイム · 8言語対応",
+ tDark:"純黒テーマに切替",tWhite:"純白テーマに切替",langOK:"言語を切替しました",
+ pickLangTitle:"言語を選択",cur:"現在",tapSwitch:"タップで切替",save:"保存",edit:"編集",del:"削除",dir:"フォルダ",
+ target:"対象システム",editTip:"ファイル名をタップして編集",noFiles:"ファイルがありません<br>上の「+ ファイル追加」から追加",
+ projName:"プロジェクト名：",sameName:"同名プロジェクトが存在します",
+ pickSys:"対象システムを選択",rec:"推奨",old:"古いPC対応",cancel:"キャンセル",
+ needDl:"テンプレートのダウンロードが必要",dlNow:"ダウンロード",dlDesc:"完了後自動的に続行",
+ creating:"プロジェクト作成中",unzip:"テンプレート展開中…",rename:"名前変更中…",done:"完了",
+ createOK:"プロジェクトを作成しました",createFail:"作成に失敗",noExe:"nw.exe が見つかりません",
+ dlTitle:"ダウンロード中",dlSize:"約80〜120MB",dlOK:"テンプレートのダウンロード完了",dlFail:"ダウンロードに失敗",retry:"再試行",enterFirst:"先にアプリに入る",
+ hasDl:"ダウンロード済み · タップで管理",noDlD:"未ダウンロード · タップでダウンロード",redl:"再ダウンロード（上書き）",delTpl:"テンプレートを削除",
+ deleting:"削除中…",deleted:"削除しました",
+ exeHint:"テスト実行方法：\n\n1. 「パックして共有」で ZIP を作成\n2. 対応する PC に送り解凍\n3. EXE をダブルクリック\n\nEXE 本体のアイコン：PC で Resource Hacker 等で変更可能",
+ delConfirm:"プロジェクト「{n}」全体を削除しますか？\n\nファイルは完全に削除され元に戻せません！",
+ delFile:"{n} を削除しますか？",added:"追加しました ",tooBig:"15MB 超は未対応です",addFail:"追加失敗：",
+ iconOK:"アイコンを設定しました",iconFail:"アイコン設定失敗：",readFail:"読込失敗：",
+ saved:"保存しました ",saveFail:"保存失敗：",cleaning:"クリーンアップ中…",cleanOK:"完了",
+ noIndex:"index.html（メインページ）がありません",noTpl:"{n} テンプレートが削除済みのためパックできません",
+ startPack:"パック中 {n}（{r} {v}）…",genPkg:"package.json を生成",genPkgIco:"package.json を生成（アイコン付き）",
+ collect:"{n} 件を収集",genNw:"{n}.nw を生成",packed:"パック完了：{s}、共有中…",
+ packDone:"完了。ZIP は鳳夏パッカーフォルダに保存されました。",packFind:"{p} を生成しました。",
+ packFailTip:"ヒント：失敗してもプロジェクトファイルには影響しません。",packFail:"パック失敗、ログを確認",
+ zipFail:".nw 圧縮失敗：",zipFail2:"ZIP パック失敗：",logErr:"[エラー] ",logOK:"[OK] ",
+ downloading:"ダウンロード中",errBoot:"起動エラー 行",errUnknown:"不明なエラー",
+ dlWin:"ダウンロード中 {p}%"},
+ru:{app:"Упаковщик FengXia",boot:"Запуск…",conn:"Подключение к мосту…",noBridge:"Не удалось подключиться к мосту",
+ bridgeFail:"Запустите как APK",noExt:"Модуль ext недоступен",preview:"Режим предпросмотра? Соберите APK для теста",
+ needPerm:"Требуется доступ ко всем файлам",goPerm:"Разрешить",initing:"Инициализация…",
+ firstUse:"Первое использование",firstUseD:"Можно войти сейчас; шаблоны скачиваются при создании проектов",enter:"Войти",
+ dl7:"Скачать шаблон Win7 (~80МБ)",back:"Назад",
+ homeHint:"Превратите веб-страницы в <b>программы Windows двойным щелчком</b>.<br>Встроенный редактор · Runtime <b>Win7</b> / <b>Win10/11</b>.",
+ rtTpl:"Шаблоны runtime",dl:"Загружен",noDl:"Не загружен",manage:"(нажмите для управления)",
+ noProj:"Пока нет проектов<br>Нажмите [+] внизу справа",settings:"Настройки",
+ addFile:"+ Добавить файл",refresh:"Обновить",runHint:"Инструкция теста",
+ secApp:"Приложение и значок",lblName:"Имя приложения (заголовок)",lblW:"Ширина",lblH:"Высота",
+ pickIcon:"Свой значок окна",iconSet:"Значок: icon.png (при упаковке)",iconNone:"Значок не задан (по умолчанию)",
+ pack:"Упаковать и поделиться",packNote:"package.json создаётся автоматически.<br>Значок применяется к заголовку / панели задач; значок EXE меняется через Resource Hacker на ПК.<br>(Удаляются только временные файлы)",
+ delProj:"Удалить проект",secLang:"Язык",stLang:"Язык приложения",stLangD:"Вступает в силу сразу",
+ secAppear:"Внешний вид",stTheme:"Тема",stThemeD:"Чистый чёрный / белый",
+ secEditor:"Редактор кода",stWrap:"Перенос строк",stWrapD:"Переносить длинные строки",
+ stHint:"Автодополнение",stHintD:"Подсказки при вводе",lblFont:"Размер шрифта (px)",
+ secMaint:"Обслуживание",btnClean:"Очистить временные файлы",cleanNote:"Удаляются только промежуточные файлы; проекты сохраняются.",
+ verNote:"Упаковщик FengXia "+APPVER+"<br>от FengXia Studio · Встроенный редактор · Двойной runtime · 8 языков",
+ tDark:"Чистый чёрный включён",tWhite:"Чистый белый включён",langOK:"Язык изменён",
+ pickLangTitle:"Выбор языка",cur:"Текущий",tapSwitch:"Нажмите для смены",save:"Сохранить",edit:"Изменить",del:"Удалить",dir:"Папка",
+ target:"Целевая система",editTip:"Нажмите имя файла для правки",noFiles:"Файлов пока нет<br>Нажмите «+ Добавить файл»",
+ projName:"Имя проекта:",sameName:"Проект с таким именем уже есть",
+ pickSys:"Выберите целевую систему",rec:"Рекомендуется",old:"Для старых ПК",cancel:"Отмена",
+ needDl:"Нужна загрузка шаблона",dlNow:"Скачать",dlDesc:"Продолжится автоматически",
+ creating:"Создание проекта",unzip:"Распаковка шаблона…",rename:"Переименование…",done:"Готово",
+ createOK:"Проект создан",createFail:"Не удалось создать",noExe:"nw.exe не найден",
+ dlTitle:"Загрузка",dlSize:"~80-120МБ",dlOK:"Шаблон загружен",dlFail:"Ошибка загрузки",retry:"Повторить",enterFirst:"Сначала войти",
+ hasDl:"Загружен · нажмите",noDlD:"Не загружен · нажмите для загрузки",redl:"Скачать заново",delTpl:"Удалить шаблон",
+ deleting:"Удаление…",deleted:"Удалено",
+ exeHint:"Как протестировать:\n\n1. «Упаковать и поделиться» создаст ZIP\n2. Отправьте на ПК и распакуйте\n3. Дважды щёлкните EXE\n\nЗначок EXE: меняется на ПК через Resource Hacker",
+ delConfirm:"Удалить весь проект «{n}»?\n\nФайлы будут удалены безвозвратно!",
+ delFile:"Удалить {n} ?",added:"Добавлено ",tooBig:"Файл более 15МБ не поддерживается",addFail:"Ошибка добавления: ",
+ iconOK:"Значок установлен",iconFail:"Ошибка значка: ",readFail:"Ошибка чтения: ",
+ saved:"Сохранено ",saveFail:"Ошибка сохранения: ",cleaning:"Очистка…",cleanOK:"Очищено",
+ noIndex:"Отсутствует index.html (главная страница)",noTpl:"Шаблон {n} удалён; скачайте снова",
+ startPack:"Упаковка {n} ({r} {v})…",genPkg:"package.json создан",genPkgIco:"package.json создан (со значком)",
+ collect:"Собрано {n} эл.",genNw:"Создан {n}.nw",packed:"Готово: {s}, отправка…",
+ packDone:"Готово. ZIP сохранён в папке FengXia.",packFind:"Создан {p}, ищите в файловом менеджере.",
+ packFailTip:"Подсказка: сбой не затрагивает файлы проекта.",packFail:"Сбой упаковки, см. журнал",
+ zipFail:"Ошибка сжатия .nw: ",zipFail2:"Ошибка упаковки ZIP: ",logErr:"[Ошибка] ",logOK:"[OK] ",
+ downloading:"Загрузка",errBoot:"Ошибка запуска, строка ",errUnknown:"Неизвестная ошибка",
+ dlWin:"Загрузка {p}%"},
+pt:{app:"Empacotador FengXia",boot:"Iniciando…",conn:"Conectando à ponte…",noBridge:"Não foi possível conectar à ponte",
+ bridgeFail:"Execute como APK",noExt:"Módulo ext indisponível",preview:"Modo prévia? Compile como APK para testar",
+ needPerm:"Permissão de acesso a todos os arquivos necessária",goPerm:"Conceder permissão",initing:"Inicializando…",
+ firstUse:"Primeiro uso",firstUseD:"Você pode entrar agora; baixe modelos ao criar projetos",enter:"Entrar",
+ dl7:"Baixar modelo Win7 agora (~80MB)",back:"Voltar",
+ homeHint:"Transforme páginas web em <b>programas Windows de duplo clique</b>.<br>Editor integrado · Runtime <b>Win7</b> / <b>Win10/11</b>.",
+ rtTpl:"Modelos de runtime",dl:"Baixado",noDl:"Não baixado",manage:"(toque para gerenciar)",
+ noProj:"Ainda não há projetos<br>Toque [+] no canto inferior",settings:"Configurações",
+ addFile:"+ Adicionar arquivo",refresh:"Atualizar",runHint:"Guia de teste",
+ secApp:"App e ícone",lblName:"Nome do app (título)",lblW:"Largura",lblH:"Altura",
+ pickIcon:"Ícone de janela personalizado",iconSet:"Ícone: icon.png (ao empacotar)",iconNone:"Sem ícone (padrão)",
+ pack:"Empacotar e compartilhar",packNote:"package.json é gerado automaticamente.<br>O ícone vale para barra de título / barra de tarefas; o ícone do EXE precisa de Resource Hacker no PC.<br>(Só limpa arquivos temporários)",
+ delProj:"Excluir projeto",secLang:"Idioma",stLang:"Idioma do app",stLangD:"Efeito imediato",
+ secAppear:"Aparência",stTheme:"Tema",stThemeD:"Preto puro / Branco puro",
+ secEditor:"Editor de código",stWrap:"Quebra de linha",stWrapD:"Quebrar linhas longas",
+ stHint:"Preenchimento automático",stHintD:"Sugestões ao digitar",lblFont:"Tamanho da fonte (px)",
+ secMaint:"Manutenção",btnClean:"Limpar temporários",cleanNote:"Limpa apenas arquivos intermediários; os projetos são preservados.",
+ verNote:"Empacotador FengXia "+APPVER+"<br>por FengXia Studio · Editor integrado · Runtime duplo · 8 idiomas",
+ tDark:"Tema preto ativado",tWhite:"Tema branco ativado",langOK:"Idioma alterado",
+ pickLangTitle:"Selecionar idioma",cur:"Atual",tapSwitch:"Toque para mudar",save:"Salvar",edit:"Editar",del:"Excluir",dir:"Pasta",
+ target:"Sistema alvo",editTip:"Toque no nome para editar",noFiles:"Ainda não há arquivos<br>Toque \"+ Adicionar arquivo\"",
+ projName:"Nome do projeto:",sameName:"Já existe projeto com esse nome",
+ pickSys:"Escolher sistema alvo",rec:"Recomendado",old:"Para PCs antigos",cancel:"Cancelar",
+ needDl:"Download do modelo necessário",dlNow:"Baixar",dlDesc:"Continua automaticamente",
+ creating:"Criando projeto",unzip:"Extraindo modelo…",rename:"Renomeando…",done:"Pronto",
+ createOK:"Projeto criado",createFail:"Falha ao criar",noExe:"nw.exe não encontrado",
+ dlTitle:"Baixando",dlSize:"~80-120MB",dlOK:"Modelo baixado",dlFail:"Falha no download",retry:"Tentar novamente",enterFirst:"Entrar primeiro",
+ hasDl:"Baixado · toque para gerenciar",noDlD:"Não baixado · toque para baixar",redl:"Baixar novamente",delTpl:"Excluir modelo",
+ deleting:"Excluindo…",deleted:"Excluído",
+ exeHint:"Como testar:\n\n1. Use «Empacotar e compartilhar» para criar ZIP\n2. Envie ao PC e extraia\n3. Duplo clique no EXE\n\nÍcone do EXE: altere no PC com Resource Hacker",
+ delConfirm:"Excluir todo o projeto «{n}»?\n\nOs arquivos serão removidos permanentemente!",
+ delFile:"Excluir {n} ?",added:"Adicionado ",tooBig:"Arquivo acima de 15MB não suportado",addFail:"Falha ao adicionar: ",
+ iconOK:"Ícone definido",iconFail:"Falha no ícone: ",readFail:"Falha ao ler: ",
+ saved:"Salvo ",saveFail:"Falha ao salvar: ",cleaning:"Limpando…",cleanOK:"Limpo",
+ noIndex:"Falta index.html (página principal)",noTpl:"O modelo {n} foi excluído; baixe novamente",
+ startPack:"Empacotando {n} ({r} {v})…",genPkg:"package.json gerado",genPkgIco:"package.json gerado (com ícone)",
+ collect:"{n} itens coletados",genNw:"Gerado {n}.nw",packed:"Empacotado: {s}, compartilhando…",
+ packDone:"Pronto. ZIP salvo na pasta FengXia.",packFind:"Gerado {p}, veja no gerenciador de arquivos.",
+ packFailTip:"Dica: a falha não afeta os arquivos do projeto.",packFail:"Falha ao empacotar, veja o log",
+ zipFail:"Falha ao compactar .nw: ",zipFail2:"Falha ao empacotar ZIP: ",logErr:"[Erro] ",logOK:"[OK] ",
+ downloading:"Baixando",errBoot:"Erro de inicialização linha ",errUnknown:"Erro desconhecido",
+ dlWin:"Baixando {p}%"}
+};
+
+/* 语言辅助：T(key) 取当前语言文本；fmt 做占位替换 */
+let CUR="zh";
+function T(key){
+ const d=I18N[CUR]||I18N.zh;
+ return d[key]!==undefined?d[key]:(I18N.zh[key]||"");
+}
+function fmt(s,map){
+ return String(s).replace(/\{(\w+)\}/g,function(_,k){return map[k]!==undefined?map[k]:"{"+k+"}";});
+}
+
+const RUNTIMES={
+ nw7:{ name:"Windows 7", ver:"0.41.3", short:"Win7",
+       url:"https://dl.nwjs.io/v0.41.3/nwjs-v0.41.3-win-x64.zip",
+       zip:ROOT+"/nwjswin7.zip" },
+ nw10:{ name:"Windows 10/11", ver:"0.117.0", short:"Win10/11",
+       url:"https://dl.node-webkit.org/v0.117.0/nwjs-v0.117.0-win-x64.zip",
+       zip:ROOT+"/nwjswin10.zip" }
+};
+
+let cur=null,ready=false,projRT="nw7",projIcon="";
+
+/* ===== 设置（localStorage 持久化）===== */
+const SET={theme:"dark",wrap:false,hint:true,font:14,lang:"zh"};
+function loadSet(){
+ try{
+  const s=JSON.parse(localStorage.getItem("fxset")||"{}");
+  Object.assign(SET,s);
+ }catch(_){}
+ CUR=LANGS[SET.lang]?SET.lang:"zh";
+ applyTheme();
+}
+function saveSet(){try{localStorage.setItem("fxset",JSON.stringify(SET));}catch(_){}}
+function applyTheme(){
+ document.body.classList.toggle("white",SET.theme==="white");
+ const t=$("tglTheme");if(t)t.classList.toggle("on",SET.theme==="white");
+}
+function toggleTheme(){
+ SET.theme=SET.theme==="white"?"dark":"white";
+ saveSet();applyTheme();
+ toast(SET.theme==="white"?T("tWhite"):T("tDark"));
+}
+
+/* ===== 工具函数 ===== */
+function log(m,e){const b=$("log");b.style.display="block";
+ b.textContent+=(b.textContent?"\n":"")+(e?T("logErr"):T("logOK"))+m;b.scrollTop=b.scrollHeight;}
+function toast(m){try{webcat.ui.toast(m)}catch(_){}}
+function fmtSize(s){return s>1048576?(s/1048576).toFixed(1)+"M":s>1024?(s/1024).toFixed(1)+"K":s+"B"}
+function errText(e){
+ if(!e)return T("errUnknown");
+ if(typeof e==="string")return e;
+ if(e.message)return e.message;
+ try{return JSON.stringify(e)}catch(_){return String(e)}
+}
+function dlg(title,opts,cb){
+ $("dlgTitle").textContent=title;
+ const box=$("dlgOpts");box.innerHTML="";
+ opts.forEach(function(o){
+  const el=document.createElement("div");
+  el.className="opt"+(o.cls?" "+o.cls:"");
+  el.innerHTML="<b>"+o.t+"</b>"+(o.d?"<small>"+o.d+"</small>":"");
+  el.onclick=function(){$("dlgMask").style.display="none";cb(o.val);};
+  box.appendChild(el);
+ });
+ $("dlgMask").style.display="flex";
+}
+async function rmrf(path){
+ try{
+  const r=await webcat.ext.list("root",path);
+  if(r&&r.items){
+   for(const it of r.items){
+    const p=path+"/"+it.name;
+    if(it.isDir)await rmrf(p);
+    else await webcat.ext.delete("root",p);
+   }
+  }
+ }catch(_){}
+ try{await webcat.ext.delete("root",path);}catch(_){}
+}
+function cleanupTemp(){
+ rmrf(ROOT+"/_staging");
+ rmrf(ROOT+"/_staging.zip");
+ rmrf(ROOT+"/_inner_tmp");
+ rmrf(ROOT+"/_unzip_tmp");
+}
+
+/* ===== 进度条 ===== */
+let pTimer=null,pCur=0;
+function paint(){$("pbar").style.width=pCur+"%";$("pct").textContent=Math.round(pCur)+"%";}
+function pStart(){
+ pCur=2;$("pbarWrap").style.display="block";paint();
+ if(pTimer)clearInterval(pTimer);
+ pTimer=setInterval(()=>{if(pCur<90){pCur+=0.5;paint();}},400);
+}
+function setP(p,label){
+ if(pTimer)clearInterval(pTimer);
+ pTimer=setInterval(()=>{if(pCur<p){pCur=Math.min(pCur+1.2,p);paint();}},80);
+ if(label)$("initSub").textContent=label;
+}
+function pEnd(ok){
+ if(pTimer)clearInterval(pTimer);pTimer=null;
+ if(ok){pCur=100;paint();setTimeout(pHide,600);}else pHide();
+}
+function pReal(pc,txt){
+ $("pbarWrap").style.display="block";
+ $("pbar").style.width=pc+"%";$("pct").textContent=txt;
+}
+function pHide(){$("pbarWrap").style.display="none";$("pct").textContent="";}
+
+/* ===== 启动 ===== */
+async function waitWebcat(){
+ for(let i=0;i<30;i++){
+  $("initSub").textContent=T("conn")+" ("+Math.round(i/2)+"s)";
+  if(window.webcat)return true;
+  await new Promise(r=>setTimeout(r,500));
+ }
+ return false;
+}
+async function init(){
+ loadSet();
+ applyLang();
+ try{
+  if(!await waitWebcat()){
+   $("initMsg").textContent=T("noBridge");
+   $("initSub").textContent=T("bridgeFail");
+   return;
+  }
+  if(!webcat.ext||!webcat.ext.isFullAccess){
+   $("initMsg").textContent=T("noExt");
+   $("initSub").textContent=T("preview");
+   return;
+  }
+  if(!webcat.ext.isFullAccess().granted){
+   $("initMsg").textContent=T("needPerm");
+   $("initBtn").textContent=T("goPerm");
+   $("initBtn").style.display="block";
+   $("initBtn").onclick=function(){
+    webcat.ext.requestFullAccess();
+    setTimeout(()=>location.reload(),1500);
+   };
+   return;
+  }
+  $("initSub").textContent=T("initing");
+  await webcat.ext.mkdir("root",ROOT);
+  cleanupTemp();
+  const has7=webcat.ext.exists("root",RUNTIMES.nw7.zip).exists;
+  const has10=webcat.ext.exists("root",RUNTIMES.nw10.zip).exists;
+  if(has7||has10){ startApp(); return; }
+  $("initMsg").textContent=T("firstUse");
+  $("initSub").textContent=T("firstUseD");
+  $("initBtn").textContent=T("enter");
+  $("initBtn").style.display="block";
+  $("initBtn").onclick=startApp;
+  $("initBtn2").textContent=T("dl7");
+  $("initBtn2").style.display="block";
+  $("initBtn2").onclick=function(){ downloadTemplate("nw7",startApp); };
+ }catch(e){
+  $("initMsg").textContent=T("createFail");
+  $("initSub").textContent=errText(e);
+ }
+}
+function startApp(){
+ $("init").style.display="none";
+ $("initBtn").style.display="none";
+ $("initBtn2").style.display="none";
+ pHide();
+ $("home").style.display="flex";
+ ready=true;
+ renderHome();renderRTInfo();
+}
+if(document.readyState==="loading"){
+ document.addEventListener("DOMContentLoaded",init);
+}else{ init(); }
+
+/* ===== 下载模板 ===== */
+let downloading=false;
+function downloadTemplate(key,cb){
+ if(downloading){toast(T("dlTitle")+"…");return;}
+ downloading=true;
+ const rt=RUNTIMES[key];
+ $("initMsg").textContent=T("dlTitle")+" "+rt.name;
+ $("initSub").textContent="v"+rt.ver+" · "+T("dlSize");
+ $("initBtn").style.display="none";
+ $("initBtn2").style.display="none";
+ $("init").style.display="flex";
+ webcat.download.stream({
+  url:rt.url, source:"root", path:rt.zip,
+  onProgress:function(p){
+   if(p&&p.total){
+    const pc=Math.round(p.loaded/p.total*100);
+    pReal(pc,fmt(T("dlWin"),{p:pc})+"\n"+fmtSize(p.loaded)+" / "+fmtSize(p.total));
+   }
+  }
+ }).then(function(r){
+  downloading=false;
+  if(!r||!r.ok)throw errText(r&&r.error)||T("dlFail");
+  pReal(100,T("done"));
+  toast(T("dlOK"));
+  setTimeout(function(){ if(cb)cb(); else startApp(); },600);
+ }).catch(function(e){
+  downloading=false;
+  pHide();
+  $("initMsg").textContent=T("dlFail");
+  $("initSub").textContent=errText(e);
+  $("initBtn").textContent=T("retry");
+  $("initBtn").style.display="block";
+  $("initBtn").onclick=function(){ downloadTemplate(key,cb); };
+  $("initBtn2").textContent=T("enterFirst");
+  $("initBtn2").style.display="block";
+  $("initBtn2").onclick=startApp;
+ });
+}
+
+/* ===== 语言 ===== */
+function applyLang(){
+ document.documentElement.lang=CUR==="zh"?"zh-CN":CUR;
+ document.title=T("app");
+ $("homeTitle").textContent=T("app");
+ $("homeHint").innerHTML=T("homeHint");
+ $("btnSet1").textContent=T("settings");$("btnSet2").textContent=T("settings");
+ $("chipAdd").textContent=T("addFile");
+ $("chipRefresh").textContent=T("refresh");
+ $("chipHint").textContent=T("runHint");
+ $("secAppSet").textContent=T("secApp");
+ $("lblAppName").textContent=T("lblName");
+ $("lblWinW").textContent=T("lblW");$("lblWinH").textContent=T("lblH");
+ $("btnIcon").textContent=T("pickIcon");
+ $("btnPack").textContent=T("pack");
+ $("packNote").innerHTML=T("packNote");
+ $("btnDel").textContent=T("delProj");
+ $("btnSave").textContent=T("save");
+ $("setTitle").textContent=T("settings");
+ $("secLang").textContent=T("secLang");
+ $("stLang").textContent=T("stLang");$("stLangD").textContent=T("stLangD");
+ $("langCur").textContent=(LANGS[CUR]||LANGS.zh).label;
+ $("secAppear").textContent=T("secAppear");
+ $("stTheme").textContent=T("stTheme");$("stThemeD").textContent=T("stThemeD");
+ $("secEditor").textContent=T("secEditor");
+ $("stWrap").textContent=T("stWrap");$("stWrapD").textContent=T("stWrapD");
+ $("stHint").textContent=T("stHint");$("stHintD").textContent=T("stHintD");
+ $("lblFont").textContent=T("lblFont");
+ $("secMaint").textContent=T("secMaint");
+ $("btnClean").textContent=T("btnClean");
+ $("cleanNote").textContent=T("cleanNote");
+ $("verNote").innerHTML=T("verNote");
+ $("initSub").textContent=T("boot");
+ updateIconLabel();
+ renderRTInfo();
+ const empty=$("projList").querySelector(".empty");
+ if(empty)empty.innerHTML=T("noProj");
+}
+function pickLanguage(){
+ dlg(T("pickLangTitle"),Object.keys(LANGS).map(function(k){
+  return {t:LANGS[k].label+(k===CUR?" · "+T("cur"):""),
+          d:k===CUR?"":T("tapSwitch"),
+          cls:k===CUR?"sel":"",val:k};
+ }),function(k){
+  if(!k||k===CUR)return;
+  CUR=k;SET.lang=k;saveSet();
+  applyLang();
+  if(ready)renderHome();
+  toast(T("langOK"));
+ });
+}
+
+/* ===== 首页 ===== */
+async function renderHome(){
+ if(!ready)return;
+ const r=await webcat.ext.list("root",ROOT);
+ const list=(r.items||[]).filter(x=>x.isDir&&!x.name.startsWith("_")&&!x.name.startsWith("."))
+   .sort((a,b)=>(b.modified||0)-(a.modified||0));
+ const box=$("projList");
+ if(!list.length){box.innerHTML="<div class='empty'>"+T("noProj")+"</div>";return;}
+ box.innerHTML="";
+ for(const p of list){
+  let tag="";
+  try{
+   const f=await webcat.ext.readFile("root",ROOT+"/"+p.name+"/_runtime.txt","utf8");
+   if(f&&f.ok&&RUNTIMES[String(f.content).trim()])tag=" · "+RUNTIMES[String(f.content).trim()].short;
+  }catch(_){}
+  const d=p.modified?new Date(p.modified*1000).toLocaleDateString():"";
+  const el=document.createElement("div");el.className="proj";
+  el.innerHTML='<div class="picon">DIR</div>'
+   +'<div class="info"><div class="nm">'+p.name+'</div><div class="tm">'+d+tag+'</div></div>'
+   +'<div class="arrow">›</div>';
+  el.onclick=function(){openProj(p.name);};
+  box.appendChild(el);
+ }
+}
+function goHome(){
+ cur=null;
+ $("proj").style.display="none";$("home").style.display="flex";
+ renderHome();renderRTInfo();
+}
+
+/* ===== 运行时管理 ===== */
+function renderRTInfo(){
+ const el=$("rtInfo");if(!el)return;
+ try{
+  const h7=webcat.ext.exists("root",RUNTIMES.nw7.zip).exists;
+  const h10=webcat.ext.exists("root",RUNTIMES.nw10.zip).exists;
+  el.textContent=T("rtTpl")+"：Win7 "+(h7?T("dl"):T("noDl"))
+   +" · Win10/11 "+(h10?T("dl"):T("noDl"))+" "+T("manage");
+ }catch(_){el.textContent=T("rtDetect")||"…";}
+}
+function manageRuntime(){
+ try{
+  const h7=webcat.ext.exists("root",RUNTIMES.nw7.zip).exists;
+  const h10=webcat.ext.exists("root",RUNTIMES.nw10.zip).exists;
+  dlg(T("rtTpl"),[
+   {t:"Win7 v0.41.3",d:h7?T("hasDl"):T("noDlD"),val:"1"},
+   {t:"Win10/11 v0.117.0",d:h10?T("hasDl"):T("noDlD"),val:"2"},
+   {t:T("cancel"),cls:"warn",val:"0"}
+  ],function(v){
+   if(v==="0")return;
+   const key=v==="1"?"nw7":"nw10";
+   const rt=RUNTIMES[key];
+   const has=webcat.ext.exists("root",rt.zip).exists;
+   if(!has){ downloadTemplate(key,startApp); return; }
+   dlg(rt.name,[
+    {t:T("redl"),val:"1"},
+    {t:T("delTpl"),cls:"warn",val:"2"},
+    {t:T("cancel"),val:"0"}
+   ],function(a){
+    if(a==="1")downloadTemplate(key,startApp);
+    else if(a==="2"){
+     toast(T("deleting"));
+     webcat.ext.delete("root",rt.zip).then(function(){toast(T("deleted"));renderRTInfo();});
+    }
+   });
+  });
+ }catch(e){toast(errText(e));}
+}
+
+/* ===== 新建项目 ===== */
+async function newProject(){
+ if(!ready)return;
+ const name=(prompt(T("projName"))||"").trim().replace(/[\\/:*?"<>|]/g,"");
+ if(!name)return;
+ const dir=ROOT+"/"+name;
+ if(webcat.ext.exists("root",dir).exists){toast(T("sameName"));return;}
+ dlg(T("pickSys"),[
+  {t:"Windows 10/11",d:"NW.js v0.117.0 · "+T("rec"),val:"nw10"},
+  {t:"Windows 7",d:"NW.js v0.41.3 · "+T("old"),val:"nw7"},
+  {t:T("cancel"),cls:"warn",val:""}
+ ],function(key){
+  if(!key)return;
+  createProject(name,dir,key);
+ });
+}
+async function createProject(name,dir,key){
+ const rt=RUNTIMES[key];
+ if(!webcat.ext.exists("root",rt.zip).exists){
+  dlg(T("needDl"),[
+   {t:T("dlNow")+" "+rt.name,d:T("dlDesc"),val:"1"},
+   {t:T("cancel"),cls:"warn",val:"0"}
+  ],async function(a){
+   if(a!=="1")return;
+   await new Promise(function(res){ downloadTemplate(key,res); });
+   if(webcat.ext.exists("root",rt.zip).exists)doCreate(name,dir,key);
+  });
+  return;
+ }
+ doCreate(name,dir,key);
+}
+async function doCreate(name,dir,key){
+ const rt=RUNTIMES[key];
+ $("initMsg").textContent=T("creating")+" ("+rt.short+")";
+ $("initSub").textContent=T("unzip");
+ $("initBtn").style.display="none";
+ $("initBtn2").style.display="none";
+ $("init").style.display="flex";
+ pStart();
+ try{
+  setP(20,T("unzip"));
+  await webcat.ext.mkdir("root",dir);
+  const u=await webcat.ext.unzip("root",rt.zip,dir);
+  if(!u||!u.ok)throw T("createFail");
+
+  setP(90,T("rename"));
+  const items=await webcat.ext.list("root",dir);
+  if(items.items.length===1&&items.items[0].isDir&&items.items[0].name!==name){
+   await webcat.ext.move("root",dir,ROOT+"/_unzip_tmp");
+   await webcat.ext.move("root",ROOT+"/_unzip_tmp/"+items.items[0].name,dir);
+   await rmrf(ROOT+"/_unzip_tmp");
+  }
+  if(!webcat.ext.exists("root",dir+"/nw.exe").exists)throw T("noExe");
+
+  try{
+   if(webcat.ext.exists("root",dir+"/index.html").exists)
+    await webcat.ext.delete("root",dir+"/index.html");
+  }catch(_){}
+
+  await webcat.ext.writeFile("root",dir+"/_runtime.txt",key,"utf8");
+  const langTag=CUR==="zh"?"zh-CN":CUR;
+  const hello=CUR==="zh"?("你好，"+name+"！")
+   :CUR==="ja"?("こんにちは、"+name+"！")
+   :CUR==="ru"?("Привет, "+name+"!")
+   :("Hello, "+name+"!");
+  const tpl="<!DOCTYPE html>\n<html lang=\""+langTag+"\">\n<head>\n<meta charset=\"UTF-8\">\n"
+   +"<title>"+name+"</title>\n<style>\nbody{margin:0;display:flex;justify-content:center;"
+   +"align-items:center;height:100vh;font-family:sans-serif;color:#666}\n</style>\n</head>\n"
+   +"<body>\n<h1>"+hello+"</h1>\n<script>\n// 在这里写你的代码\n<\/script>\n</body>\n</html>";
+  await webcat.ext.writeFile("root",dir+"/index.html",tpl,"utf8");
+
+  setP(96,T("done"));
+  pEnd(true);
+  $("init").style.display="none";
+  toast(T("createOK")+" ("+rt.short+")");
+  openProj(name);
+ }catch(e){
+  pEnd(false);
+  await rmrf(dir);
+  await rmrf(ROOT+"/_unzip_tmp");
+  $("initMsg").textContent=T("createFail");
+  $("initSub").textContent=errText(e);
+  $("initBtn").textContent=T("back");
+  $("initBtn").style.display="block";
+  $("initBtn").onclick=startApp;
+ }
+}
+
+/* ===== 项目详情 ===== */
+const RUNTIME=/^(nw\.exe|nw\.nw|.*\.dll|.*\.pak|.*\.bin|.*\.dat|.*\.ico|package\.json|_runtime\.txt|icon\.png)$/i;
+const RUNTIME_DIR=/^(locales|swiftshader)$/i;
+const TEXT_EXT=/^(html|htm|css|js|json|txt|md|svg|xml|csv)$/i;
+
+async function openProj(name){
+ cur=name;$("pTitle").textContent=name;
+ $("appName").value=name;
+ $("log").textContent="";$("log").style.display="none";
+ projRT="nw7";projIcon="";
+ try{
+  const f=await webcat.ext.readFile("root",ROOT+"/"+name+"/_runtime.txt","utf8");
+  if(f&&f.ok&&RUNTIMES[String(f.content).trim()])projRT=String(f.content).trim();
+ }catch(_){}
+ updateIconLabel();
+ $("home").style.display="none";$("proj").style.display="flex";
+ refreshFiles();
+}
+function updateIconLabel(){
+ $("iconName").textContent=projIcon?T("iconSet"):T("iconNone");
+}
+async function refreshFiles(){
+ const r=await webcat.ext.list("root",ROOT+"/"+cur);
+ const box=$("files");
+ const files=(r.items||[]).filter(x=>!x.isDir&&!RUNTIME.test(x.name));
+ const dirs=(r.items||[]).filter(x=>x.isDir&&!RUNTIME_DIR.test(x.name));
+ const head='<div class="hint" style="margin-bottom:10px">'+T("target")+'： <b>'
+  +RUNTIMES[projRT].name+' (v'+RUNTIMES[projRT].ver+')</b><br>'+T("editTip")+'</div>';
+ if(!files.length&&!dirs.length){
+  box.innerHTML=head+"<div class='empty'>"+T("noFiles")+"</div>";
+  return;
+ }
+ box.innerHTML=head;
+ files.forEach(function(f){
+  const el=document.createElement("div");el.className="fileitem";
+  const ext=f.name.split(".").pop().toLowerCase();
+  const isText=TEXT_EXT.test(ext);
+  el.innerHTML='<div class="ficon">'+(isText?ext.toUpperCase().slice(0,4):"BIN")+'</div>'
+   +'<div class="fname">'+f.name+'</div>'
+   +'<div class="fsize">'+fmtSize(f.size||0)+'</div>'
+   +(isText?'<button class="fedit">'+T("edit")+'</button>':'')
+   +'<button class="fdel">'+T("del")+'</button>';
+  if(isText)el.querySelector(".fedit").onclick=function(){openEditor(f.name);};
+  el.querySelector(".fname").onclick=function(){ if(isText)openEditor(f.name); };
+  el.querySelector(".fdel").onclick=async function(){
+   if(!confirm(fmt(T("delFile"),{n:f.name})))return;
+   await webcat.ext.delete("root",ROOT+"/"+cur+"/"+f.name);
+   refreshFiles();
+  };
+  box.appendChild(el);
+ });
+ dirs.forEach(function(d){
+  const el=document.createElement("div");el.className="fileitem";
+  el.innerHTML='<div class="ficon">DIR</div><div class="fname">'+d.name+'/</div><div class="fsize">'+T("dir")+'</div>';
+  box.appendChild(el);
+ });
+}
+async function addFile(){
+ try{
+  const r=await webcat.media.pickFile("*/*");
+  if(!r||!r.ok)return;
+  if(r.size>15*1024*1024){toast(T("tooBig"));return;}
+  await webcat.ext.writeFile("root",ROOT+"/"+cur+"/"+r.name,r.base64,"base64");
+  toast(T("added")+r.name);
+  refreshFiles();
+ }catch(e){toast(T("addFail")+errText(e))}
+}
+async function pickIcon(){
+ try{
+  const r=await webcat.media.pickFile("image/*");
+  if(!r||!r.ok)return;
+  await webcat.ext.writeFile("root",ROOT+"/"+cur+"/icon.png",r.base64,"base64");
+  projIcon="icon.png";
+  updateIconLabel();
+  toast(T("iconOK"));
+ }catch(e){toast(T("iconFail")+errText(e))}
+}
+async function delProject(){
+ if(!confirm(fmt(T("delConfirm"),{n:cur})))return;
+ toast(T("deleting"));
+ await rmrf(ROOT+"/"+cur);
+ toast(T("deleted"));
+ goHome();
+}
+function openExeHint(){
+ alert(T("exeHint"));
+}
+
+/* ===== 代码编辑器 ===== */
+let cmInstance=null,edFile=null,plainEd=null;
+function isDark(){return SET.theme!=="white";}
+async function openEditor(fname){
+ const path=ROOT+"/"+cur+"/"+fname;
+ let content="";
+ try{
+  const r=await webcat.ext.readFile("root",path,"utf8");
+  if(r&&r.ok)content=String(r.content);
+  else if(r&&r.base64)content="";
+ }catch(e){toast(T("readFail")+errText(e));return;}
+ edFile=fname;
+ $("edName").textContent=fname;
+ $("proj").style.display="none";
+ $("editorPage").style.display="flex";
+ const wrap=$("edWrap");
+ if(typeof CodeMirror!=="undefined"){
+  wrap.innerHTML="";
+  const mode=fname.endsWith(".html")||fname.endsWith(".htm")?"htmlmixed"
+   :fname.endsWith(".css")?"css"
+   :fname.endsWith(".js")||fname.endsWith(".json")?"javascript":"text/html";
+  cmInstance=CodeMirror(wrap,{
+   value:content, mode:mode, lineNumbers:true,
+   lineWrapping:!!SET.wrap,
+   autoCloseTags:true, matchBrackets:true,
+   indentUnit:2, tabSize:2,
+   extraKeys:{
+    "Ctrl-Space":"autocomplete",
+    "Ctrl-S":function(){saveEditor();}
+   }
+  });
+  applyEdStyle();
+  if(SET.hint){
+   cmInstance.on("inputRead",function(cmir,ch){
+    if(/\w|<|\./.test(ch.text[ch.text.length-1]||"")){
+     CodeMirror.showHint(cmir,{completeSingle:false});
+    }
+   });
+  }
+ }else{
+  wrap.innerHTML='<textarea id="plainEd" spellcheck="false"></textarea>';
+  plainEd=$("plainEd");
+  plainEd.value=content;
+  plainEd.style.fontSize=SET.font+"px";
+  plainEd.style.whiteSpace=SET.wrap?"pre-wrap":"pre";
+ }
+}
+function applyEdStyle(){
+ if(!cmInstance)return;
+ cmInstance.setOption("lineWrapping",!!SET.wrap);
+ const w=$("edWrap").querySelector(".CodeMirror");
+ if(w){
+  w.style.fontSize=SET.font+"px";
+  w.style.background=isDark()?"#0d0f14":"#ffffff";
+ }
+}
+async function saveEditor(){
+ if(!edFile)return;
+ const content=cmInstance?cmInstance.getValue():plainEd.value;
+ try{
+  await webcat.ext.writeFile("root",ROOT+"/"+cur+"/"+edFile,content,"utf8");
+  toast(T("saved")+edFile);
+ }catch(e){toast(T("saveFail")+errText(e))}
+}
+function closeEditor(){
+ cmInstance=null;plainEd=null;edFile=null;
+ $("editorPage").style.display="none";
+ $("proj").style.display="flex";
+ refreshFiles();
+}
+
+/* ===== 设置页 ===== */
+function openSettings(){
+ $("home").style.display="none";
+ $("proj").style.display="none";
+ $("setPage").style.display="flex";
+ $("tglTheme").classList.toggle("on",SET.theme==="white");
+ $("tglWrap").classList.toggle("on",!!SET.wrap);
+ $("tglHint").classList.toggle("on",!!SET.hint);
+ $("setFont").value=SET.font;
+ $("langCur").textContent=(LANGS[CUR]||LANGS.zh).label;
+}
+function closeSettings(){
+ $("setPage").style.display="none";
+ if(cur){$("proj").style.display="flex";}
+ else{$("home").style.display="flex";}
+}
+function toggleSet(key,el){
+ SET[key]=!SET[key];
+ el.classList.toggle("on",SET[key]);
+ saveSet();
+ if(key==="wrap")applyEdStyle();
+}
+function saveFontSize(v){
+ const n=parseInt(v)||14;
+ SET.font=n;saveSet();applyEdStyle();
+ if(plainEd)plainEd.style.fontSize=n+"px";
+}
+function doCleanup(){
+ toast(T("cleaning"));
+ cleanupTemp();
+ toast(T("cleanOK"));
+}
+
+/* ===== 打包 ===== */
+async function doPack(){
+ if(!cur)return;
+ const app=($("appName").value||cur).replace(/[\\/:*?"<>|]/g,"");
+ const dir=ROOT+"/"+cur;
+ const rt=RUNTIMES[projRT];
+ if(!webcat.ext.exists("root",dir+"/index.html").exists){
+  toast(T("noIndex"));
+  return;
+ }
+ if(!webcat.ext.exists("root",rt.zip).exists){
+  toast(fmt(T("noTpl"),{n:rt.name}));
+  return;
+ }
+ $("log").textContent="";$("log").style.display="block";
+ log(fmt(T("startPack"),{n:app,r:rt.short,v:rt.ver}));
+ try{
+  /* 1. 生成 package.json（含图标/窗口配置） */
+  const winCfg={width:+$("winW").value||1280,height:+$("winH").value||800};
+  if(projIcon)winCfg.icon=projIcon;
+  const pkg=JSON.stringify({name:cur,main:"index.html",window:winCfg},null,2);
+  await webcat.ext.writeFile("root",dir+"/package.json",pkg);
+  log(projIcon?T("genPkgIco"):T("genPkg"));
+
+  /* 2. 素材 → 暂存目录 */
+  await rmrf(ROOT+"/_staging");
+  await webcat.ext.mkdir("root",ROOT+"/_staging");
+  await webcat.ext.copy("root",dir+"/package.json",ROOT+"/_staging/package.json");
+  if(projIcon)
+   await webcat.ext.copy("root",dir+"/icon.png",ROOT+"/_staging/icon.png");
+  const lst=await webcat.ext.list("root",dir);
+  let n=0;
+  for(const it of lst.items){
+   if(it.isDir){
+    if(RUNTIME_DIR.test(it.name))continue;
+    await webcat.ext.copy("root",dir+"/"+it.name,ROOT+"/_staging/"+it.name);n++;
+   }else if(!RUNTIME.test(it.name)){
+    await webcat.ext.copy("root",dir+"/"+it.name,ROOT+"/_staging/"+it.name);n++;
+   }
+  }
+  log(fmt(T("collect"),{n:n}));
+
+  /* 3. 压成 .zip 改名 .nw */
+  await rmrf(ROOT+"/_staging.zip");
+  const z1=await webcat.ext.zip("root",ROOT+"/_staging",ROOT+"/_staging.zip");
+  if(!z1||!z1.ok)throw T("zipFail")+errText(z1&&z1.error);
+  await rmrf(ROOT+"/_staging");
+  const nwPath=dir+"/"+app+".nw";
+  if(webcat.ext.exists("root",nwPath).exists)
+   await webcat.ext.delete("root",nwPath);
+  await webcat.ext.move("root",ROOT+"/_staging.zip",nwPath);
+  log(fmt(T("genNw"),{n:app}));
+
+  /* 4. 整个项目 → 最终 ZIP */
+  const zipPath=ROOT+"/"+app+"_"+rt.short+"_pack.zip";
+  if(webcat.ext.exists("root",zipPath).exists)
+   await webcat.ext.delete("root",zipPath);
+  const z2=await webcat.ext.zip("root",dir,zipPath);
+  if(!z2||!z2.ok)throw T("zipFail2")+errText(z2&&z2.error);
+  log(fmt(T("packed"),{s:fmtSize(z2.size||0)}));
+
+  const s=webcat.share.file("root",zipPath,"application/zip");
+  if(s&&s.ok)log(T("packDone"));
+  else log(fmt(T("packFind"),{p:zipPath}));
+ }catch(e){
+  log(errText(e),true);
+  log(T("packFailTip"));
+  toast(T("packFail"));
+ }
+}
+</script>
+</body>
+</html>
