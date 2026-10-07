@@ -1,6 +1,44 @@
-# FengXia-Packer
-Do you want to write HTML code on the go anytime, anywhere? This tool can help you out - it can even package your HTML code, images, and more into an exe (zip file) with just one click
-YeahmakeUse itNWJSing NWJSGSe the official NWGS onedataumpackageerJS packager websiteing the official NWJS packager Iwe, we'll do thise the official NWJS packager. We've got thisll handle thispackage this Fre going to use this Fuve got this Fun don't do this for this meal'll follow these stepsHere are the steps to do thisLet's go through these stepsWe've made this process step by stepreally easystep-by-step and made it easy to followwhole process visuale -fan step visualizedis -fan step visualized heree -fan step visualized, so thanks for that here, so thanks for that, so thanks for that - thanks to N here, so thanks to NWized - thanks to NWJSis -fan step visualized - thanks to NWJS, so thanks to NWJS Ninge -fan step visualized - thanks to NWJS Ningis -fan step visualized, so thanks to NWJS Ninge -fan step visualized - thanks to NWJS Ningis -fan step visualized, so thanks to NWJS Ninge -fan step visual here, so thanks to NWJS official teamis -fan step visualized, so thanks to NWJS official team so thanks to NWJS official teamized, so thanks to NWJS official teame -fan step visualized here, so thanks to NWJS official teamis -fan step visualized, so thanks to NWJS for that.e -fan step visualized, so thanks to NWJS for this.er. We've made the -fan step visualized - thanks to NWJS official teamager. We've made the -fan step visualized - thanks to NWJS official marketing, so thanks to NWJS official marketing teamis -fan step visualized - thanks to NWJS official team, so thanks to NWJS official teame -fan step visualized - thanks to NWJS official teamis -fan step visualized, so thanks to NWJS for that!
-YouinsidesubstanceIncludeds 8 varietiesdifferent lengthscommon onestypesphraseslanguagest comes with 8 common languages, thoughncludes 8 common languages availablewith real-time supportfor real-time editingwith real-time editing capabilitiesfor real-time text editingwith real-time editing capabilitiesfor real-time editingwith real-time supportfunctionalityreal-time code in 8 common languages8 common languages for real-time ghostwritingcodinge outliningreal-time code highlighting in 8 common languagesin 8 common languages8 common languages with real-time code highlightingsuper bright real-time code displayreal-time code highlighting in 8 common languagesand auto-completion in 8 common languageshigh-contrast code hints in 8 common languagescode highlighting and automatic suggestions in 8 common languageshigh-contrast code highlighting in 8 common languages for non-code items- the code is really clearsuper convenientcode highlighting and auto-coding suggestions in 8 common languages - super convenient!matic suggestions in 8 common languages - super convenient!
-NoallCome on inAll fromFrom ChinaBy Feng from ChinaFrom Fengxia in ChinaBy Fengxia Gong from ChinaFrom China, let's put down workpeople who quit their jobsDone by Feng Xia from ChinaCreated by Fengxia Studio from ChinaProduced by Fengxia Studio from China.
-Really cheapSee you laterorry about thatis, mate English classe English, but this is what I can doit might not be perfect, this English might be a bitere might be some mistakes in this Englishan error in this English sentencesome mistakes in this Englishspelling mistakes in the English.English spelling mistakes here because about that, there might be some spelling mistakes in the English, because, there might be some English spelling mistakes here becausespelling mistakes in the English because I'm using usedEnglish mistakes because I used a translatorspelling mistakes because I used a translatormistakes because I used a translatormistakes in this English because I used a translatorion toolorit was translated by a translatorerrors in this English text because it was translated by the author himselfmistakes in this English because it was translated using a translatormistakes in this English because it was translated by a translator - the author himself didn't evenoesn't know any English at allsome mistakes in this English because it was translated by a machine and the author doesn't know any English at alltranslator - the author doesn't know English at allmachine. The author doesn't speak English at allknow English at allany English at all, sospeak English at all, soI used a translator. The author doesn't know English at all, so is this rightit was translated by a machine. The author doesn't know English at all, so they just typed it outany English at all, so this was just typed upEnglish at all, so this is just something written up in MalayI'm just translating from Chineseany English at all, so the comments in the codeEnglish at all, so the comments in the codeerrors in this English because it was translated by a machine. The author doesn't know any English at all, so the comments in the code aremistakes in this English because it was translated by a machine. The author doesn't know any English at all, so the comments in the code areerrors in this English because it was translated by a machine. The author doesn't know English at all, so the comments in the code were written usingmistakes in this English because it was translated by a translator. The author doesn't know any English at all, so the comments in the code are just using Chinesemachine. The author doesn't know any English at all, so the comments in the code are in Chinesewritten in ChineseEnglish at all, so the comments in the code are in Chineseany English at all, so the comments in the code are written in ChineseEnglish at all, so the comments in the code are written in Chinese!
+# 风夏打包器 · FengXia-Packer
+
+> 随时随地写网页，一键打包成 Windows 可执行文件（.exe）。
+
+把你的 HTML、图片、CSS、JS 等项目文件，一键打包成一个双击就能运行的 exe，
+接收方不需要装 Node、不需要装任何运行环境，打开即用。
+
+---
+
+## ✨ 功能特性
+
+- **一键打包**：HTML 及其依赖资源（图片、样式、脚本）打包为独立 exe
+- **内置代码编辑器**：支持 8 种常见语言，实时代码高亮 + 自动补全
+- **基于 NW.js**：底层使用成熟的 NW.js 运行时，打包产物自带 Chromium
+- **图形界面**：无需命令行，点几下就能完成打包
+
+## 📦 适合用来做什么
+
+- 把 HTML 小游戏 / 小工具发给朋友，双击即玩
+- 给网页作品做一个脱离浏览器的独立版本
+- 快速演示、离线展示
+
+## 🚀 使用步骤
+
+1. 打开 FengXia-Packer
+2. 选择你的入口文件（通常是 `index.html`）
+3. 点击打包，等待完成即可
+
+## 🛠️ 技术栈
+
+- 运行时：[NW.js](https://nwjs.io/)
+- 打包：nwjs-packager
+
+## 📄 开源说明
+
+本项目仅供学习交流，请勿用于打包未经授权的第三方内容。
+
+---
+
+<div align="center">
+
+由 <b>风夏工作室 · Fengxia Studio</b> 开发 · 中国
+
+</div>
